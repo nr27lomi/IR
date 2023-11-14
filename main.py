@@ -8,25 +8,35 @@ if not pt.started():
     pt.init()
 
 def create_index(documents):
-    indexer = pt.IterDictIndexer("/tmp/index", overwrite=True, meta={'docno': 100, 'text': 20480})
+    indexer = pt.IterDictIndexer("./tmp/index", overwrite=True, meta={'docno': 20, 'text': 11000})
     index_ref = indexer.index(documents)
     return pt.IndexFactory.of(index_ref)
 
-#documents = list(dataset.docs_iter())
-#df = pd.DataFrame([{'doc_id': [],'text': []}])
-data = {'doc_id': [], 'text': []}
+def getDFs():
+    qrels = {'qid': [], 'docno': [], 'relevance': []}
+    topics = {'qid': [], 'query': []}
 
+    for query in dataset.queries_iter():
+        if query.query_id =='q062212790': print(query.default_text())
+        topics['qid'].append(query.query_id)
+        topics['query'].append(query.default_text())
 
-for documents in list(dataset.docs_iter()) [:5]:
-    print (documents.doc_id)
-    data['doc_id'].append(documents.doc_id)
-    data['text'].append(documents.text)
+    for rel in dataset.qrels_iter():
+        qrels['qid'].append(rel.query_id)
+        qrels['docno'].append(rel.doc_id)
+        qrels['relevance'].append(rel.relevance)
 
-df = pd.DataFrame(data)
+    qrelDF = pd.DataFrame(qrels)
+    queryDF = pd.DataFrame(topics)
+    return qrelDF, queryDF
 
-# Print the resulting DataFrame
-print(df)
-#index = create_index(documents)
-#bm25 = pt.BatchRetrieve(index, wmodel="BM25")
-#bm25.search("cheap car")
+Docs = []
+for document in list(dataset.docs_iter()):
+    
+    Docs.append({'docno': document.doc_id, 'text': document.text})
+    
+index = create_index(Docs)
+bm25 = pt.BatchRetrieve(index, wmodel="BM25")
+qrels, topics = getDFs()
+print(pt.Experiment([bm25], topics, qrels, eval_metrics=['ndcg_cut_5']))
 
