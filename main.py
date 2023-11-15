@@ -1,5 +1,6 @@
 import pyterrier as pt
 import pandas as pd
+import re
 from tira.third_party_integrations import ir_datasets
 
 dataset = ir_datasets.load('ir-lab-jena-leipzig-wise-2023/training-20231104-training')
@@ -17,9 +18,9 @@ def getDFs():
     topics = {'qid': [], 'query': []}
 
     for query in dataset.queries_iter():
-        if query.query_id =='q062212790': print(query.default_text())
         topics['qid'].append(query.query_id)
-        topics['query'].append(query.default_text())
+        CleanedText = re.sub(r'\W+', '', query.default_text())
+        topics['query'].append(CleanedText)
 
     for rel in dataset.qrels_iter():
         qrels['qid'].append(rel.query_id)
