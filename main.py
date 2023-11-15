@@ -19,7 +19,7 @@ def getDFs():
 
     for query in dataset.queries_iter():
         topics['qid'].append(query.query_id)
-        CleanedText = re.sub(r'\W+', '', query.default_text())
+        CleanedText = re.sub(r'[^ \w+]', '', query.default_text())
         topics['query'].append(CleanedText)
 
     for rel in dataset.qrels_iter():
