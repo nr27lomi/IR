@@ -41,3 +41,5 @@ bm25 = pt.BatchRetrieve(index, wmodel="BM25")
 qrels, topics = getDFs()
 print(pt.Experiment([bm25], topics, qrels, eval_metrics=['ndcg_cut_5']))
 
+results = bm25.transform(topics)
+pt.io.write_results(results, "/tmp/results.trec.txt", format = "trec")
