@@ -42,5 +42,5 @@ bm25 = pt.BatchRetrieve(index, wmodel="BM25")
 qrels, topics = getDFs()
 #print(pt.Experiment([bm25], topics, qrels, eval_metrics=['ndcg_cut_10', 'map_10','ndcg']))
 results = bm25.transform(topics)
-persist_and_normalize_run(results, default_file='./tmp/results.txt', system_name='BM25Base')
+persist_and_normalize_run(results, output_file='./tmp', system_name='BM25Base')
 
