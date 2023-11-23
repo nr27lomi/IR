@@ -1,8 +1,9 @@
 import pyterrier as pt
 import pandas as pd
 import re
-from tira.third_party_integrations import ir_datasets
+from tira.third_party_integrations import ir_datasets, persist_and_normalize_run, ensure_pyterrier_is_loaded
 
+ensure_pyterrier_is_loaded()
 dataset = ir_datasets.load('ir-lab-jena-leipzig-wise-2023/training-20231104-training')
 
 if not pt.started():
@@ -33,13 +34,13 @@ def getDFs():
 
 Docs = []
 for document in list(dataset.docs_iter()):
-    
-    Docs.append({'docno': document.doc_id, 'text': document.text})
+    CleanedText = document.default_text().replace('\n', ' ')
+    Docs.append({'docno': document.doc_id, 'text': CleanedText})
     
 index = create_index(Docs)
 bm25 = pt.BatchRetrieve(index, wmodel="BM25")
 qrels, topics = getDFs()
-print(pt.Experiment([bm25], topics, qrels, eval_metrics=['ndcg_cut_5']))
-
+#print(pt.Experiment([bm25], topics, qrels, eval_metrics=['ndcg_cut_10', 'map_10','ndcg']))
 results = bm25.transform(topics)
-pt.io.write_results(results, "/tmp/results.trec.txt", format = "trec")
+persist_and_normalize_run(results, default_file='./tmp/results.txt', system_name='BM25Base')
+
